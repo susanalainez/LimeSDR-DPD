@@ -19,24 +19,24 @@ use ieee.std_logic_arith.all;
 -- ----------------------------------------------------------------------------
 -- Entity declaration
 -- ----------------------------------------------------------------------------
-entity QADPD is
-	
 	generic (
 		n: natural:=5; -- memory depth
 		m: natural:=3; -- nonlinearity
 		mul_n: natural:=18); -- multiplier precision
 	port (
-		clk, sclk   : in std_logic;
+		clk  		: in std_logic;
+		--sclk  		: in std_logic;
 		reset_n   	: in std_logic;
 		data_valid	: in std_logic;
-		xpi       	: in std_logic_vector(13 downto 0); 
-		xpq       	: in std_logic_vector(13 downto 0); 
-		ypi       	: out std_logic_vector(13 downto 0);  
-		ypq       	: out std_logic_vector(13 downto 0); 
-		spi_ctrl  	: in std_logic_vector(15 downto 0); 
-		spi_data  	: in std_logic_vector(15 downto 0);
-		inp: in std_logic;
-		outp: out std_logic);
+		xpi       	: in std_logic_vector(13 downto 0); 	-- real
+		xpq       	: in std_logic_vector(13 downto 0); 	-- imaginary
+		ypi       	: out std_logic_vector(13 downto 0);  	-- real
+		ypq       	: out std_logic_vector(13 downto 0)--; 	-- imaginary
+		--spi_ctrl  	: in std_logic_vector(15 downto 0); 
+		--spi_data  	: in std_logic_vector(15 downto 0);
+		--inp: in std_logic;
+		--outp: out std_logic
+		);
 	
 end entity QADPD;
 
@@ -106,65 +106,91 @@ architecture structure of QADPD is
 	signal address_i, address_j: std_logic_vector(3 downto 0);
 begin   
 	
-	--address_ij<=spi_ctrl(7 downto 0); 
-	
-	address_i<=spi_ctrl(7 downto 4);
-	address_j<=spi_ctrl(3 downto 0);
-	
+	-- TO DO
+	a(0)(0) <= -- std_logic_vector(mul_n-1 downto 0) 18 bit
+	a(0)(1) <=
+	a(0)(2) <=
+	a(1)(0) <=
+	a(1)(1) <=
+	a(1)(2) <=
+	a(2)(0) <=
+	a(2)(1) <=
+	a(2)(2) <=
+	a(3)(0) <=
+	a(3)(1) <=
+	a(3)(2) <=
+	a(4)(0) <=
+	a(4)(1) <=
+	a(4)(2) <=
 
+	b(0)(0) <=
+	b(0)(1) <=
+	b(0)(2) <=
+	b(1)(0) <=
+	b(1)(1) <=
+	b(1)(2) <=
+	b(2)(0) <=
+	b(2)(1) <=
+	b(2)(2) <=
+	b(3)(0) <=
+	b(3)(1) <=
+	b(3)(2) <=
+	b(4)(0) <=
+	b(4)(1) <=
+	b(4)(2) <=
+
+	--process(reset_n, sclk) is  -- SPI STUFF
+	--begin	
+	--	if reset_n='0' then	
+	--		for i in 0 to n loop
+	--			for j in 0 to m loop
+	--				a(i)(j)<=(others=>'0');
+	--				ap(i)(j)<=(others=>'0');
+	--				b(i)(j)<=(others=>'0');
+	--				bp(i)(j)<=(others=>'0');	
+	--			end loop;
+	--		end loop;
+	--		a(0)(0)<=x"0800"&zer;  -- unit coefficient, was: x "2000" & zer
+	--		ap(0)(0)<=x"0800"&zer;
+	--	elsif (sclk'event and sclk='1') then
+	--		if (spi_ctrl(15 downto 12)="0011") then	
+	--			
+	--			ap(CONV_INTEGER(address_i))(CONV_INTEGER(address_j))<= spi_data&spi_ctrl(9 downto 8);
+	--		elsif  (spi_ctrl(15 downto 12)= "1100") then -- update b coeff					
+	--			bp(CONV_INTEGER(address_i))(CONV_INTEGER(address_j))<= spi_data&spi_ctrl(9 downto 8);
+	--		elsif	(spi_ctrl(15 downto 12)= "1111") then -- update a and b coeff				
+	--			for i in 0 to n loop
+	--				for j in 0 to m loop
+	--					a(i)(j)<=ap(i)(j);
+	--					b(i)(j)<=bp(i)(j);	
+	--				end loop;
+	--			end loop;				  
+	--		end if;		  
+	--	end if;
+	--end process; 	
 	
-	process(reset_n, sclk) is  -- SPI STUFF
-	begin	
-		if reset_n='0' then	
-			for i in 0 to n loop
-				for j in 0 to m loop
-					a(i)(j)<=(others=>'0');
-					ap(i)(j)<=(others=>'0');
-					b(i)(j)<=(others=>'0');
-					bp(i)(j)<=(others=>'0');	
-				end loop;
-			end loop;
-			a(0)(0)<=x"0800"&zer;  -- unit coefficient, was: x "2000" & zer
-			ap(0)(0)<=x"0800"&zer;
-		elsif (sclk'event and sclk='1') then
-			if (spi_ctrl(15 downto 12)="0011") then	
-				
-				ap(CONV_INTEGER(address_i))(CONV_INTEGER(address_j))<= spi_data&spi_ctrl(9 downto 8);
-			elsif  (spi_ctrl(15 downto 12)= "1100") then -- update b coeff					
-				bp(CONV_INTEGER(address_i))(CONV_INTEGER(address_j))<= spi_data&spi_ctrl(9 downto 8);
-			elsif	(spi_ctrl(15 downto 12)= "1111") then -- update a and b coeff				
-				for i in 0 to n loop
-					for j in 0 to m loop
-						a(i)(j)<=ap(i)(j);
-						b(i)(j)<=bp(i)(j);	
-					end loop;
-				end loop;				  
-			end if;		  
-		end if;
-	end process; 	
-	
-	inpp(0)<=inp;
-	lab4: process (clk, reset_n) is  -- 
-	begin
-		if reset_n='0' then			
-			l1: for k in 1 to 2*(N+M+5) loop
-				inpp(k)<='0';
-			end loop;			
-			ypi<=(others=>'0');
-			ypq<=(others=>'0');
-		elsif (clk'event and clk='1') then	-- pipeline				
-			-- total delay
-			l2: for k in 1 to 2*(N+M+5) loop
-				inpp(k)<=inpp(k-1);
-			end loop;
-			-- delay 2 bars
-			if (data_valid='1') then
-				ypi <=  ypi_s;
-				ypq <=  ypq_s;
-			end if;
-		end if;			
-	end process;	
-	outp<=inpp(2*(N+M+5)); -- for delay
+	--inpp(0)<=inp;
+	--lab4: process (clk, reset_n) is  -- 
+	--begin
+	--	if reset_n='0' then			
+	--		l1: for k in 1 to 2*(N+M+5) loop
+	--			inpp(k)<='0';
+	--		end loop;			
+	--		ypi<=(others=>'0');
+	--		ypq<=(others=>'0');
+	--	elsif (clk'event and clk='1') then	-- pipeline				
+	--		-- total delay
+	--		l2: for k in 1 to 2*(N+M+5) loop
+	--			inpp(k)<=inpp(k-1);
+	--		end loop;
+	--		-- delay 2 bars
+	--		if (data_valid='1') then
+	--			ypi <=  ypi_s;
+	--			ypq <=  ypq_s;
+	--		end if;
+	--	end if;			
+	--end process;	
+	--outp<=inpp(2*(N+M+5)); -- for delay
 	
 	
 	lab_IN: process (clk, reset_n) is  -- sign extension from 14 bit to 18 bit
