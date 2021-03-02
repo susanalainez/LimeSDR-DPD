@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------
--- FILE: QADPD.vhd
+-- FILE: DPD.vhd
 -- DESCRIPTION: Quadrature predistorter model
 -- DATE: Apr 26, 2016
 -- AUTHOR (s): Borisav Jovanovic, Lime Microsystems
@@ -19,6 +19,7 @@ use ieee.std_logic_arith.all;
 -- ----------------------------------------------------------------------------
 -- Entity declaration
 -- ----------------------------------------------------------------------------
+entity DPD is
 	generic (
 		n: natural:=5; -- memory depth
 		m: natural:=3; -- nonlinearity
@@ -38,9 +39,9 @@ use ieee.std_logic_arith.all;
 		--outp: out std_logic
 		);
 	
-end entity QADPD;
+end entity DPD;
 
-architecture structure of QADPD is
+architecture structure of DPD is
 	
 	component Multiplier2 IS
 		PORT
@@ -107,37 +108,57 @@ architecture structure of QADPD is
 begin   
 	
 	-- TO DO
-	a(0)(0) <= -- std_logic_vector(mul_n-1 downto 0) 18 bit
-	a(0)(1) <=
-	a(0)(2) <=
-	a(1)(0) <=
-	a(1)(1) <=
-	a(1)(2) <=
-	a(2)(0) <=
-	a(2)(1) <=
-	a(2)(2) <=
-	a(3)(0) <=
-	a(3)(1) <=
-	a(3)(2) <=
-	a(4)(0) <=
-	a(4)(1) <=
-	a(4)(2) <=
+	a(0)(0) <= (others=>'0'); -- std_logic_vector(mul_n-1 downto 0) 18 bit
+	a(0)(1) <= (others=>'0');
+	a(0)(2) <= (others=>'0');
+	a(0)(3) <= (others=>'0');
+	a(1)(0) <= (others=>'0');
+	a(1)(1) <= (others=>'0');
+	a(1)(2) <= (others=>'0');
+	a(1)(3) <= (others=>'0');
+	a(2)(0) <= (others=>'0');
+	a(2)(1) <= (others=>'0');
+	a(2)(2) <= (others=>'0');
+	a(2)(3) <= (others=>'0');
+	a(3)(0) <= (others=>'0');
+	a(3)(1) <= (others=>'0');
+	a(3)(2) <= (others=>'0');
+	a(3)(3) <= (others=>'0');
+	a(4)(0) <= (others=>'0');
+	a(4)(1) <= (others=>'0');
+	a(4)(2) <= (others=>'0');
+	a(4)(3) <= (others=>'0');
+	a(5)(0) <= (others=>'0');
+	a(5)(1) <= (others=>'0');
+	a(5)(2) <= (others=>'0');
+	a(5)(3) <= (others=>'0');
 
-	b(0)(0) <=
-	b(0)(1) <=
-	b(0)(2) <=
-	b(1)(0) <=
-	b(1)(1) <=
-	b(1)(2) <=
-	b(2)(0) <=
-	b(2)(1) <=
-	b(2)(2) <=
-	b(3)(0) <=
-	b(3)(1) <=
-	b(3)(2) <=
-	b(4)(0) <=
-	b(4)(1) <=
-	b(4)(2) <=
+	b(0)(0) <= (others=>'0'); -- std_logic_vector(mul_n-1 downto 0) 18 bit
+	b(0)(1) <= (others=>'0');
+	b(0)(2) <= (others=>'0');
+	b(0)(3) <= (others=>'0');
+	b(1)(0) <= (others=>'0');
+	b(1)(1) <= (others=>'0');
+	b(1)(2) <= (others=>'0');
+	b(1)(3) <= (others=>'0');
+	b(2)(0) <= (others=>'0');
+	b(2)(1) <= (others=>'0');
+	b(2)(2) <= (others=>'0');
+	b(2)(3) <= (others=>'0');
+	b(3)(0) <= (others=>'0');
+	b(3)(1) <= (others=>'0');
+	b(3)(2) <= (others=>'0');
+	b(3)(3) <= (others=>'0');
+	b(4)(0) <= (others=>'0');
+	b(4)(1) <= (others=>'0');
+	b(4)(2) <= (others=>'0');
+	b(4)(3) <= (others=>'0');
+	b(5)(0) <= (others=>'0');
+	b(5)(1) <= (others=>'0');
+	b(5)(2) <= (others=>'0');
+	b(5)(3) <= (others=>'0');
+
+	
 
 	--process(reset_n, sclk) is  -- SPI STUFF
 	--begin	
