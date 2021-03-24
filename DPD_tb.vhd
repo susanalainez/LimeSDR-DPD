@@ -15,20 +15,20 @@
                   clk : IN std_logic;
                   reset_n : IN std_logic; 
             data_valid : IN std_logic; 
-            xpi : IN std_logic_vector(15 downto 0);
-            xpq : IN std_logic_vector(15 downto 0);
-                  ypi : OUT std_logic_vector(15 downto 0);
-            ypq : OUT std_logic_vector(15 downto 0)
+            xpi : IN std_logic_vector(47 downto 0);
+            xpq : IN std_logic_vector(47 downto 0);
+                  ypi : OUT std_logic_vector(47 downto 0);
+            ypq : OUT std_logic_vector(47 downto 0)
                   );
           END COMPONENT;
 
             signal clk : std_logic := '0';
             signal reset_n : std_logic := '0';
-            signal data_valid : std_logic := '1'; 
-            signal xpi : std_logic_vector(15 downto 0) := (others=>'0');
-            signal xpq : std_logic_vector(15 downto 0) := (others=>'0');
-            signal ypi : std_logic_vector(15 downto 0);
-            signal ypq : std_logic_vector(15 downto 0);
+            signal data_valid : std_logic := '0'; 
+            signal xpi : std_logic_vector(47 downto 0) := "010101000100010101010100010001010101010001000101";
+            signal xpq : std_logic_vector(47 downto 0) := "010101000100010101010100010001010101010001000101";
+            signal ypi : std_logic_vector(47 downto 0);
+            signal ypq : std_logic_vector(47 downto 0);
           
 
   BEGIN
@@ -51,6 +51,7 @@
 
         wait for 100 ns; -- wait until global set/reset completes
       reset_n <= '1';
+      data_valid <= '1';
         -- Add user defined stimulus here
       loop
       clk <= '1';
