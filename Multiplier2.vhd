@@ -41,18 +41,22 @@ LIBRARY lpm;
 USE lpm.all;
 
 ENTITY Multiplier2 IS
+	generic ( 
+			dataa_n: natural:= 47;  -- number of results bits
+			result_n: natural:= 951);   -- addition addi == 1
+
 	PORT
 	(
-		dataa		: IN STD_LOGIC_VECTOR (17 DOWNTO 0);
-		datab		: IN STD_LOGIC_VECTOR (17 DOWNTO 0);
-		result		: OUT STD_LOGIC_VECTOR (35 DOWNTO 0)
+		dataa		: IN STD_LOGIC_VECTOR (dataa_n DOWNTO 0);
+		datab		: IN STD_LOGIC_VECTOR (dataa_n DOWNTO 0);
+		result		: OUT STD_LOGIC_VECTOR (result_n DOWNTO 0)
 	);
 END Multiplier2;
 
 
 ARCHITECTURE SYN OF multiplier2 IS
 
-	SIGNAL sub_wire0	: STD_LOGIC_VECTOR (35 DOWNTO 0);
+	SIGNAL sub_wire0	: STD_LOGIC_VECTOR (result_n DOWNTO 0);
 
 
 
@@ -66,23 +70,23 @@ ARCHITECTURE SYN OF multiplier2 IS
 		lpm_widthp		: NATURAL
 	);
 	PORT (
-			dataa	: IN STD_LOGIC_VECTOR (17 DOWNTO 0);
-			datab	: IN STD_LOGIC_VECTOR (17 DOWNTO 0);
-			result	: OUT STD_LOGIC_VECTOR (35 DOWNTO 0)
+			dataa	: IN STD_LOGIC_VECTOR (dataa_n DOWNTO 0);
+			datab	: IN STD_LOGIC_VECTOR (dataa_n DOWNTO 0);
+			result	: OUT STD_LOGIC_VECTOR (result_n DOWNTO 0)
 	);
 	END COMPONENT;
 
 BEGIN
-	result    <= sub_wire0(35 DOWNTO 0);
+	result    <= sub_wire0(103 DOWNTO 0);
 
 	lpm_mult_component : lpm_mult
 	GENERIC MAP (
 		lpm_hint => "DEDICATED_MULTIPLIER_CIRCUITRY=YES,MAXIMIZE_SPEED=5",
 		lpm_representation => "SIGNED",
 		lpm_type => "LPM_MULT",
-		lpm_widtha => 18,
-		lpm_widthb => 18,
-		lpm_widthp => 36
+		lpm_widtha => dataa_n+1,
+		lpm_widthb => dataa_n+1,
+		lpm_widthp => result_n+1
 	)
 	PORT MAP (
 		dataa => dataa,

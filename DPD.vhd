@@ -19,20 +19,24 @@ use ieee.std_logic_arith.all;
 -- ----------------------------------------------------------------------------
 -- Entity declaration
 -- ----------------------------------------------------------------------------
+
+
 entity DPD is
+--constant BUS_WIDTH : real := 16;
 	generic (
 		n: natural:=5; -- memory depth
 		m: natural:=3; -- nonlinearity
-		mul_n: natural:=18); -- multiplier precision
+		BUS_WIDTH : natural := 47;
+		mul_n: natural:=52); -- multiplier precision
 	port (
 		clk  		: in std_logic;
 		--sclk  		: in std_logic;
 		reset_n   	: in std_logic;
 		data_valid	: in std_logic;
-		xpi       	: in std_logic_vector(13 downto 0); 	-- real
-		xpq       	: in std_logic_vector(13 downto 0); 	-- imaginary
-		ypi       	: out std_logic_vector(13 downto 0);  	-- real
-		ypq       	: out std_logic_vector(13 downto 0)--; 	-- imaginary
+		xpi       	: in std_logic_vector(BUS_WIDTH downto 0); 	-- real
+		xpq       	: in std_logic_vector(BUS_WIDTH downto 0); 	-- imaginary
+		ypi       	: out std_logic_vector(BUS_WIDTH downto 0);  	-- real
+		ypq       	: out std_logic_vector(BUS_WIDTH downto 0)--; 	-- imaginary
 		--spi_ctrl  	: in std_logic_vector(15 downto 0); 
 		--spi_data  	: in std_logic_vector(15 downto 0);
 		--inp: in std_logic;
@@ -44,18 +48,21 @@ end entity DPD;
 architecture structure of DPD is
 	
 	component Multiplier2 IS
+		generic ( 
+			dataa_n: natural:= mul_n-1;  -- number of results bits
+			result_n: natural:= 2*mul_n-1);   -- addition addi == 1
 		PORT
 			(
-			dataa		: IN STD_LOGIC_VECTOR (17 DOWNTO 0);
-			datab		: IN STD_LOGIC_VECTOR (17 DOWNTO 0);
-			result		: OUT STD_LOGIC_VECTOR (35 DOWNTO 0)
+			dataa		: IN STD_LOGIC_VECTOR (dataa_n DOWNTO 0);
+			datab		: IN STD_LOGIC_VECTOR (dataa_n DOWNTO 0);
+			result		: OUT STD_LOGIC_VECTOR (result_n DOWNTO 0)
 			);
 	END component Multiplier2;
 	
 	component adder is
 		generic ( 
-			res_n: natural:=18;  -- number of results bits
-			op_n: natural:=18;   -- the number of bits of the operand
+			res_n: natural:= mul_n;  -- number of results bits
+			op_n: natural:=mul_n;   -- the number of bits of the operand
 			addi: natural:=1);   -- addition addi == 1
 		port(
 			dataa		: in std_logic_vector (op_n-1 downto 0);
@@ -70,12 +77,12 @@ architecture structure of DPD is
 	type cols2 is array (M downto 0) of std_logic_vector(2*mul_n-1 downto 0);
 	type matr2 is array (N downto 0) of cols2;	
 	
-	type cols3 is array (M downto 0) of std_logic_vector(mul_n+12 downto 0);  -- bilo je 8
+	type cols3 is array (M downto 0) of std_logic_vector(mul_n+46 downto 0);  -- bilo je 8
 	type matr3 is array (N downto 0) of cols3;	
 	
 	signal epprim: cols; 
 	
-	constant extens: std_logic_vector(mul_n-18 downto 0):=(others=>'0'); 
+	constant extens: std_logic_vector(mul_n-mul_n downto 0):=(others=>'0'); 
 	signal XIp, XQp, XIpp, XQpp: std_logic_vector(mul_n-1 downto 0);	
 	signal sig1, sig2: std_logic_vector(2*mul_n-1 downto 0);
 	signal sig3, sig4, ep, epp: std_logic_vector(mul_n-1 downto 0);
@@ -96,67 +103,67 @@ architecture structure of DPD is
 	
 	signal a, ap, b, bp: matr;
 	--signal address_ij: std_logic_vector(7 downto 0);
-	constant zer: std_logic_vector(mul_n-17 downto 0):=(others=>'0');  
+	constant zer: std_logic_vector(mul_n-19 downto 0):=(others=>'0');  
 	
 	constant all_zeros: std_logic_vector(mul_n-5 downto 0):=(others=>'0'); -- it was mul_n-1 downto 0
 	constant all_ones: std_logic_vector(mul_n-5 downto 0):=(others=>'1');  -- it was mul_n-1 downto 0 	
 	signal sigI, sigQ: std_logic_vector(mul_n-5 downto 0);	-- was (mul_n-1 downto 0)  
-	signal	ypi_s, ypq_s: std_logic_vector(13 downto 0); 
+	signal	ypi_s, ypq_s: std_logic_vector(BUS_WIDTH downto 0); 
 	
 	signal inpp: std_logic_vector(2*(N+M+5) downto 0); -- delay line
 	signal address_i, address_j: std_logic_vector(3 downto 0);
 begin   
 	
 	-- TO DO
-	a(0)(0) <= (others=>'0'); -- std_logic_vector(mul_n-1 downto 0) 18 bit
-	a(0)(1) <= (others=>'0');
-	a(0)(2) <= (others=>'0');
-	a(0)(3) <= (others=>'0');
-	a(1)(0) <= (others=>'0');
-	a(1)(1) <= (others=>'0');
-	a(1)(2) <= (others=>'0');
-	a(1)(3) <= (others=>'0');
-	a(2)(0) <= (others=>'0');
-	a(2)(1) <= (others=>'0');
-	a(2)(2) <= (others=>'0');
-	a(2)(3) <= (others=>'0');
-	a(3)(0) <= (others=>'0');
-	a(3)(1) <= (others=>'0');
-	a(3)(2) <= (others=>'0');
-	a(3)(3) <= (others=>'0');
-	a(4)(0) <= (others=>'0');
-	a(4)(1) <= (others=>'0');
-	a(4)(2) <= (others=>'0');
-	a(4)(3) <= (others=>'0');
-	a(5)(0) <= (others=>'0');
-	a(5)(1) <= (others=>'0');
-	a(5)(2) <= (others=>'0');
-	a(5)(3) <= (others=>'0');
+	a(0)(0) <= (others=>'1'); -- std_logic_vector(mul_n-1 downto 0) 18 bit
+	a(0)(1) <= (others=>'1');
+	a(0)(2) <= (others=>'1');
+	a(0)(3) <= (others=>'1');
+	a(1)(0) <= (others=>'1');
+	a(1)(1) <= (others=>'1');
+	a(1)(2) <= (others=>'1');
+	a(1)(3) <= (others=>'1');
+	a(2)(0) <= (others=>'1');
+	a(2)(1) <= (others=>'1');
+	a(2)(2) <= (others=>'1');
+	a(2)(3) <= (others=>'1');
+	a(3)(0) <= (others=>'1');
+	a(3)(1) <= (others=>'1');
+	a(3)(2) <= (others=>'1');
+	a(3)(3) <= (others=>'1');
+	a(4)(0) <= (others=>'1');
+	a(4)(1) <= (others=>'1');
+	a(4)(2) <= (others=>'1');
+	a(4)(3) <= (others=>'1');
+	a(5)(0) <= (others=>'1');
+	a(5)(1) <= (others=>'1');
+	a(5)(2) <= (others=>'1');
+	a(5)(3) <= (others=>'1');
 
-	b(0)(0) <= (others=>'0'); -- std_logic_vector(mul_n-1 downto 0) 18 bit
-	b(0)(1) <= (others=>'0');
-	b(0)(2) <= (others=>'0');
-	b(0)(3) <= (others=>'0');
-	b(1)(0) <= (others=>'0');
-	b(1)(1) <= (others=>'0');
-	b(1)(2) <= (others=>'0');
-	b(1)(3) <= (others=>'0');
-	b(2)(0) <= (others=>'0');
-	b(2)(1) <= (others=>'0');
-	b(2)(2) <= (others=>'0');
-	b(2)(3) <= (others=>'0');
-	b(3)(0) <= (others=>'0');
-	b(3)(1) <= (others=>'0');
-	b(3)(2) <= (others=>'0');
-	b(3)(3) <= (others=>'0');
-	b(4)(0) <= (others=>'0');
-	b(4)(1) <= (others=>'0');
-	b(4)(2) <= (others=>'0');
-	b(4)(3) <= (others=>'0');
-	b(5)(0) <= (others=>'0');
-	b(5)(1) <= (others=>'0');
-	b(5)(2) <= (others=>'0');
-	b(5)(3) <= (others=>'0');
+	b(0)(0) <= (others=>'1'); -- std_logic_vector(mul_n-1 downto 0) 18 bit
+	b(0)(1) <= (others=>'1');
+	b(0)(2) <= (others=>'1');
+	b(0)(3) <= (others=>'1');
+	b(1)(0) <= (others=>'1');
+	b(1)(1) <= (others=>'1');
+	b(1)(2) <= (others=>'1');
+	b(1)(3) <= (others=>'1');
+	b(2)(0) <= (others=>'1');
+	b(2)(1) <= (others=>'1');
+	b(2)(2) <= (others=>'1');
+	b(2)(3) <= (others=>'1');
+	b(3)(0) <= (others=>'1');
+	b(3)(1) <= (others=>'1');
+	b(3)(2) <= (others=>'1');
+	b(3)(3) <= (others=>'1');
+	b(4)(0) <= (others=>'1');
+	b(4)(1) <= (others=>'1');
+	b(4)(2) <= (others=>'1');
+	b(4)(3) <= (others=>'1');
+	b(5)(0) <= (others=>'1');
+	b(5)(1) <= (others=>'1');
+	b(5)(2) <= (others=>'1');
+	b(5)(3) <= (others=>'1');
 
 	
 
@@ -220,8 +227,9 @@ begin
 			XIp<= (others=>'0');
 			XQp<= (others=>'0');
 		elsif   (clk'event and clk='1') then		
-			XIp<=xpi(13)&xpi(13)&xpi(13)&xpi&extens;   --xpi, xpq 14-bit numbers, belong to the range [-8191,8192]
-			XQp<=xpq(13)&xpq(13)&xpq(13)&xpq&extens;   
+			XIp<=xpi(BUS_WIDTH)&xpi(BUS_WIDTH)&xpi(BUS_WIDTH)&xpi&extens;   --xpi, xpq 14-bit numbers, belong to the range [-8191,8192]
+			--XIp<=xpi(BUS_WIDTH)&xpi(BUS_WIDTH)&xpi(BUS_WIDTH)&xpi&extens;   --xpi, xpq 14-bit numbers, belong to the range [-8191,8192]
+			XQp<=xpq(BUS_WIDTH)&xpq(BUS_WIDTH)&xpq(BUS_WIDTH)&xpq&extens;   
 		end if;
 	end process;
 	
@@ -336,7 +344,7 @@ begin
 			--    YpQ  += a[i][j]* xQep[i][j] + b[i][j]* xIep[i][j]; // 19.11.2015 
 			
 			-- 00010..000 = 1.0	  2**14  xIep
-			-- 0000 1000 0000 0000 00 = 1.0	  2**13	 koeficijent
+			-- 0000 1000 0000 0000 00 = 1.0	  2**BUS_WIDTH	 koeficijent
 			
 			Mult5:  multiplier2 
 			port map (dataa=>a(i)(j), datab=>xIep(i)(j), result=>res1(i)(j));
@@ -344,10 +352,10 @@ begin
 			Mult6:  multiplier2 
 			port map (dataa=>b(i)(j), datab=>xQep(i)(j), result=>res2(i)(j));		
 			
-			res1_s(i)(j)<=res1(i)(j)(2*mul_n-1 downto mul_n-13); -- normalization HERE
-			res2_s(i)(j)<=res2(i)(j)(2*mul_n-1 downto mul_n-13); 	   
+			res1_s(i)(j)<=res1(i)(j)(2*mul_n-1 downto mul_n-BUS_WIDTH); -- normalization HERE
+			res2_s(i)(j)<=res2(i)(j)(2*mul_n-1 downto mul_n-BUS_WIDTH); 	   
 			
-			Adder3: adder generic map (res_n=>2*mul_n, op_n=>mul_n+13, addi=>0) -- subtraction 
+			Adder3: adder generic map (res_n=>2*mul_n, op_n=>mul_n+BUS_WIDTH, addi=>0) -- subtraction 
 			port map (dataa=>res1_s(i)(j), datab=>res2_s(i)(j), res=>ijYpI(i)(j)); 
 			
 			Mult7:  multiplier2 
@@ -356,10 +364,10 @@ begin
 			Mult8:  multiplier2 
 			port map (dataa=>b(i)(j), datab=>xIep(i)(j), result=>res4(i)(j));
 			
-			res3_s(i)(j)<=res3(i)(j)(2*mul_n-1 downto mul_n-13); -- normalization HERE
-			res4_s(i)(j)<=res4(i)(j)(2*mul_n-1 downto mul_n-13); 
+			res3_s(i)(j)<=res3(i)(j)(2*mul_n-1 downto mul_n-BUS_WIDTH); -- normalization HERE
+			res4_s(i)(j)<=res4(i)(j)(2*mul_n-1 downto mul_n-BUS_WIDTH); 
 			
-			Adder4: adder generic map (res_n=>2*mul_n, op_n=>mul_n+13, addi=>1) -- addition
+			Adder4: adder generic map (res_n=>2*mul_n, op_n=>mul_n+BUS_WIDTH, addi=>1) -- addition
 			port map (dataa=>res3_s(i)(j), datab=>res4_s(i)(j), res=>ijYpQ(i)(j)); 
 			
 			lab9: process (clk, reset_n) is
@@ -423,13 +431,13 @@ begin
 	comp_I: process (YpI_s2, sigI)is
 	begin		
 		if 	(sigI= all_zeros) then
-			ypi_s<=YpI_s2(mul_n+4 downto mul_n-9); 
+			ypi_s<=YpI_s2(mul_n+21 downto mul_n-26); 
 		elsif  (sigI= all_ones) then
-			ypi_s<=YpI_s2(mul_n+4 downto mul_n-9); 
+			ypi_s<=YpI_s2(mul_n+21 downto mul_n-26); 
 		elsif sigI(mul_n-5)='0' then 
-			ypi_s<=(13=>'0', others=>'1'); 
+			ypi_s<=(BUS_WIDTH=>'0', others=>'1'); 
 		else
-			ypi_s<=(13=>'1', others=>'0'); 
+			ypi_s<=(BUS_WIDTH=>'1', others=>'0'); 
 		end if;
 		
 	end process;
@@ -437,13 +445,13 @@ begin
 	comp_Q: process (YpQ_s2, sigQ)is
 	begin		
 		if 	(sigQ= all_zeros) then
-			ypq_s<=YpQ_s2(mul_n+4 downto mul_n-9); 
+			ypq_s<=YpQ_s2(mul_n+21 downto mul_n-26); 
 		elsif  (sigQ= all_ones)  then
-			ypq_s<=YpQ_s2(mul_n+4 downto mul_n-9); 
+			ypq_s<=YpQ_s2(mul_n+21 downto mul_n-26); 
 		elsif sigQ(mul_n-5)='0'  then 
-			ypq_s<=(13=>'0', others=>'1'); 
+			ypq_s<=(BUS_WIDTH=>'0', others=>'1'); 
 		else
-			ypq_s<=(13=>'1', others=>'0'); 
+			ypq_s<=(BUS_WIDTH=>'1', others=>'0'); 
 		end if;		
 	end process;	
 	
